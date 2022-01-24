@@ -16,6 +16,13 @@ type CategoryServiceImplemenation struct {
 	validate           *validator.Validate
 }
 
+func NewCategoryService(categoryRepository repository.CategoryRepository, DB *sql.DB, validate *validator.Validate) CategoryService {
+	return &CategoryServiceImplemenation{
+		CategoryRepository: categoryRepository,
+		DB:                 DB,
+		validate:           validate}
+}
+
 func (service CategoryServiceImplemenation) Create(ctx context.Context, request web.CategoryCreateRequest) web.CategoryResponse {
 	//validasi sebelum mulai
 	err := service.validate.Struct(request)
