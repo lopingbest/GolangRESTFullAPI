@@ -15,6 +15,7 @@ type CategoryServiceImplemenation struct {
 }
 
 func (service CategoryServiceImplemenation) Create(ctx context.Context, request web.CategoryCreateRequest) web.CategoryResponse {
+	//transaksi dimulai dari service, untuk menanggulangi jika suatu saat ada kasus yang membutuhkan lebih dari satu repository
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -23,6 +24,7 @@ func (service CategoryServiceImplemenation) Create(ctx context.Context, request 
 		Name: request.Name,
 	}
 
+	//data transaksi dikirim dari service ke repository
 	category = service.CategoryRepository.Save(ctx, tx, category)
 
 	return helper.ToCategoryResponse(category)
