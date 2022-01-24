@@ -9,9 +9,11 @@ import (
 //contract categoryRepository
 type CategoryRepository interface {
 	//parameter kedua merupakan transaksional (Tx), ketiga merupakan data asli
-	Save(ctx context.Context, tx sql.Tx, category domain.Category) domain.Category
-	Update(ctx context.Context, tx sql.Tx, category domain.Category) domain.Category
-	Delete(ctx context.Context, tx sql.Tx, category domain.Category)
-	FindById(ctx context.Context, tx sql.Tx, categoryId int) domain.Category
-	FindAll(ctx context.Context, tx sql.Tx) []domain.Category
+
+	//sql dibuat pointer karena merupakan data struct, biar tidak dicopy secara terus menerus
+	Save(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category
+	Update(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category
+	Delete(ctx context.Context, tx *sql.Tx, category domain.Category)
+	FindById(ctx context.Context, tx *sql.Tx, categoryId int) (domain.Category, error)
+	FindAll(ctx context.Context, tx *sql.Tx) []domain.Category
 }
