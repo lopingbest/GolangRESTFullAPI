@@ -93,7 +93,7 @@ func (controller *CategoryControllerImplementation) FindById(w http.ResponseWrit
 	helper.WriteToResponseBody(w, webResponse)
 }
 
-func (controller *CategoryControllerImplementation) FIndAll(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func (controller *CategoryControllerImplementation) FindAll(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	//panggil service
 	categoryResponses := controller.CategoryService.FindAll(r.Context())
 	webResponse := web.WebResponse{
