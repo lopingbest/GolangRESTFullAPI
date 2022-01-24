@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"github.com/go-playground/validator/v10"
 	"lopingbest/GolangRESTFullAPI/helper"
 	"lopingbest/GolangRESTFullAPI/model/domain"
 	"lopingbest/GolangRESTFullAPI/model/repository"
@@ -12,9 +13,14 @@ import (
 type CategoryServiceImplemenation struct {
 	CategoryRepository repository.CategoryRepository
 	DB                 *sql.DB
+	validate           *validator.Validate
 }
 
 func (service CategoryServiceImplemenation) Create(ctx context.Context, request web.CategoryCreateRequest) web.CategoryResponse {
+	//validasi sebelum mulai
+	err := service.validate.Struct(request)
+	helper.PanicIfError(err)
+
 	//transaksi dimulai dari service, untuk menanggulangi jika suatu saat ada kasus yang membutuhkan lebih dari satu repository
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
@@ -31,6 +37,9 @@ func (service CategoryServiceImplemenation) Create(ctx context.Context, request 
 }
 
 func (service CategoryServiceImplemenation) Update(ctx context.Context, request web.CategoryUpdateRequest) web.CategoryResponse {
+	err := service.validate.Struct(request)
+	helper.PanicIfError(err)
+
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
