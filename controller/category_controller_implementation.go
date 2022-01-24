@@ -14,6 +14,13 @@ type CategoryControllerImplementation struct {
 	CategoryService service.CategoryService
 }
 
+//Function yang mengekspos CategoryController dan mengimplementasi struct categoryService
+func NewCategoryController(categoryService service.CategoryService) CategoryController {
+	return &CategoryControllerImplementation{
+		CategoryService: categoryService,
+	}
+}
+
 func (controller *CategoryControllerImplementation) Create(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	//parsing
 	categoryCreateRequest := web.CategoryCreateRequest{}
