@@ -13,6 +13,9 @@
   "paths": {
     "/categories": {
       "get": {
+        "security": [{
+          "CategoryAuth": []
+        }],
         "tags": ["Category API"],
         "description": "List all Categories",
         "summary": "List all Categories",
@@ -44,6 +47,9 @@
         }
       },
       "post": {
+        "security": [{
+          "CategoryAuth": []
+        }],
         "tags": ["Category API"],
         "description": "Create new Category",
         "summary": "Create new Category",
@@ -83,6 +89,9 @@
     },
     "/categories/{categoryId}": {
       "get": {
+        "security": [{
+         "CategoryAuth": []
+        }],
         "tags": ["Category API"],
         "summary": "Get Category by Id",
         "description": "Get Category by Id",
@@ -118,6 +127,9 @@
         }
       },
       "put": {
+        "security": [{
+          "CategoryAuth": []
+        }],
         "tags": ["Category API"],
         "summary": "Update category by Id",
         "description": "Update category by Id",
@@ -162,6 +174,9 @@
         }
       },
       "delete": {
+      "security": [{
+        "CategoryAuth": []
+      }],
       "tags": ["Category API"],
       "summary": "Delete Category by Id",
       "description": "Delete Category by Id",
@@ -196,6 +211,14 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "CategoryAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Authetication for Category API"
+      }
+    },
     "schemas": {
       "CreatedOrUpdatedCategory": {
         "type": "object",
