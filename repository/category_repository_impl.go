@@ -31,7 +31,6 @@ func (c *CategoryRespositoryImplementation) Update(ctx context.Context, tx *sql.
 	SQL := "update category set name = ? where id = ?"
 	_, err := tx.ExecContext(ctx, SQL, category.Name, category.Id)
 	helper.PanicIfError(err)
-	defer rows
 
 	return category
 }
@@ -63,6 +62,7 @@ func (c *CategoryRespositoryImplementation) FindAll(ctx context.Context, tx *sql
 	SQL := "select id, name from category"
 	rows, err := tx.QueryContext(ctx, SQL)
 	helper.PanicIfError(err)
+	defer rows.Close()
 
 	//data slice
 	var categories []domain.Category
