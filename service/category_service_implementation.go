@@ -6,8 +6,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"lopingbest/GolangRESTFullAPI/helper"
 	"lopingbest/GolangRESTFullAPI/model/domain"
-	"lopingbest/GolangRESTFullAPI/model/repository"
 	"lopingbest/GolangRESTFullAPI/model/web"
+	"lopingbest/GolangRESTFullAPI/repository"
 )
 
 type CategoryServiceImplemenation struct {
