@@ -2,6 +2,6 @@ package web
 
 //mengikuti apispec
 type CategoryResponse struct {
-	Id   int
-	Name string
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
