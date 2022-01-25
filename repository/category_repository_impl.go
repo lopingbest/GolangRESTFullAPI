@@ -16,7 +16,7 @@ func NewCategoryRespositoryImplementation() CategoryRepository {
 }
 
 func (c *CategoryRespositoryImplementation) Save(ctx context.Context, tx *sql.Tx, category domain.Category) domain.Category {
-	SQL := "insert into customer(name values (?)"
+	SQL := "insert into category(name) values (?)"
 	result, err := tx.ExecContext(ctx, SQL, category.Name) //category.name merupakan target
 	helper.PanicIfError(err)
 	id, err := result.LastInsertId() //mendapatkan id terakhir
@@ -31,6 +31,7 @@ func (c *CategoryRespositoryImplementation) Update(ctx context.Context, tx *sql.
 	SQL := "update category set name = ? where id = ?"
 	_, err := tx.ExecContext(ctx, SQL, category.Name, category.Id)
 	helper.PanicIfError(err)
+	defer rows
 
 	return category
 }
