@@ -3,8 +3,8 @@ package controller
 import (
 	"github.com/julienschmidt/httprouter"
 	"lopingbest/GolangRESTFullAPI/helper"
-	"lopingbest/GolangRESTFullAPI/model/service"
 	"lopingbest/GolangRESTFullAPI/model/web"
+	"lopingbest/GolangRESTFullAPI/service"
 	"net/http"
 	"strconv"
 )
