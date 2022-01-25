@@ -7,8 +7,8 @@ import (
 	"lopingbest/GolangRESTFullAPI/app"
 	"lopingbest/GolangRESTFullAPI/controller"
 	"lopingbest/GolangRESTFullAPI/helper"
-	"lopingbest/GolangRESTFullAPI/model/repository"
-	"lopingbest/GolangRESTFullAPI/model/service"
+	"lopingbest/GolangRESTFullAPI/repository"
+	"lopingbest/GolangRESTFullAPI/service"
 	"net/http"
 )
 
