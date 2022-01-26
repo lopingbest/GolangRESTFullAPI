@@ -6,6 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"lopingbest/GolangRESTFullAPI/app"
 	"lopingbest/GolangRESTFullAPI/controller"
+	"lopingbest/GolangRESTFullAPI/exception"
 	"lopingbest/GolangRESTFullAPI/helper"
 	"lopingbest/GolangRESTFullAPI/repository"
 	"lopingbest/GolangRESTFullAPI/service"
@@ -27,6 +28,8 @@ func main() {
 	router.POST("/api/categories", categoryController.Create)
 	router.PUT("/api/categories/:categoryId", categoryController.Update)
 	router.DELETE("/api/categories/:categoryId", categoryController.Delete)
+
+	router.PanicHandler = exception.ErrorHandler
 
 	server := http.Server{
 		Addr:    "localhost:3000",
