@@ -8,7 +8,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "name" : "Computer"
+  "name" : ""
 }
 
 ### Get category by Id
