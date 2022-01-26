@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/go-playground/validator/v10"
+	"lopingbest/GolangRESTFullAPI/exception"
 	"lopingbest/GolangRESTFullAPI/helper"
 	"lopingbest/GolangRESTFullAPI/model/domain"
 	"lopingbest/GolangRESTFullAPI/model/web"
@@ -48,7 +49,9 @@ func (service CategoryServiceImplemenation) Update(ctx context.Context, request 
 	helper.PanicIfError(err)
 
 	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 	defer helper.CommitOrRollback(tx)
 
 	//divalidasi dulu apakah ada atau tidak
@@ -65,7 +68,9 @@ func (service CategoryServiceImplemenation) Update(ctx context.Context, request 
 
 func (service CategoryServiceImplemenation) Delete(ctx context.Context, categoryId int) {
 	tx, err := service.DB.Begin()
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 	defer helper.CommitOrRollback(tx)
 
 	//divalidasi dulu apakah ada atau tidak
@@ -77,13 +82,15 @@ func (service CategoryServiceImplemenation) Delete(ctx context.Context, category
 	service.CategoryRepository.Delete(ctx, tx, category)
 }
 
-func (service CategoryServiceImplemenation) FindById(ctx context.Context, categoryId int) web.CategoryResponse {
+func (service *CategoryServiceImplemenation) FindById(ctx context.Context, categoryId int) web.CategoryResponse {
 	tx, err := service.DB.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
 	category, err := service.CategoryRepository.FindById(ctx, tx, categoryId)
-	helper.PanicIfError(err)
+	if err != nil {
+		panic(exception.NewNotFoundError(err.Error()))
+	}
 
 	return helper.ToCategoryResponse(category)
 }
