@@ -8,6 +8,7 @@ import (
 	"lopingbest/GolangRESTFullAPI/controller"
 	"lopingbest/GolangRESTFullAPI/exception"
 	"lopingbest/GolangRESTFullAPI/helper"
+	"lopingbest/GolangRESTFullAPI/middleware"
 	"lopingbest/GolangRESTFullAPI/repository"
 	"lopingbest/GolangRESTFullAPI/service"
 	"net/http"
@@ -33,7 +34,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    "localhost:3000",
-		Handler: router,
+		Handler: middleware.NewAuthMiddleware(router),
 	}
 
 	err := server.ListenAndServe()
