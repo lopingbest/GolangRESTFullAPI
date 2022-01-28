@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"github.com/go-playground/validator/v10"
@@ -11,10 +12,12 @@ import (
 	"lopingbest/GolangRESTFullAPI/controller"
 	"lopingbest/GolangRESTFullAPI/helper"
 	"lopingbest/GolangRESTFullAPI/middleware"
+	"lopingbest/GolangRESTFullAPI/model/domain"
 	"lopingbest/GolangRESTFullAPI/repository"
 	"lopingbest/GolangRESTFullAPI/service"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -108,11 +111,84 @@ func TestCreateCategoryFailed(t *testing.T) {
 }
 
 func TestUpdateCategorySuccess(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
+
+	//memakai tx
+	tx, _ := db.Begin()
+	//repository untuk created data
+	categoryRepository := repository.NewCategoryRespositoryImplementation()
+	category := categoryRepository.Save(context.Background(), tx, domain.Category{
+		Name: "Gadget",
+	})
+	tx.Commit()
+
+	router := setupRouter(db)
+
+	requestBody := strings.NewReader(`{"name": "Gadget"}`)
+	request := httptest.NewRequest(http.MethodPut, "http://localhost:3000/api/categories/"+strconv.Itoa(category.Id), requestBody)
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("X-API-KEY", "SECRET")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 200, response.StatusCode)
+
+	//baca body
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{} //data bisa berubah ubah
+	json.Unmarshal(body, &responseBody)
+
+	//fmt.Println(responseBody) //baca responseBody
+
+	//pengecekan mendalam
+	assert.Equal(t, 200, int(responseBody["code"].(float64))) //float64 dikonversi menjadi integer
+	assert.Equal(t, "ok", responseBody["status"])
+	assert.Equal(t, category.Id, int(responseBody["data"].(map[string]interface{})["id"].(float64)))
+	assert.Equal(t, "Gadget", responseBody["data"].(map[string]interface{})["name"])
 
 }
 
 func TestUpdateCategoryFailed(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
 
+	//memakai tx
+	tx, _ := db.Begin()
+	//repository untuk created data
+	categoryRepository := repository.NewCategoryRespositoryImplementation()
+	category := categoryRepository.Save(context.Background(), tx, domain.Category{
+		Name: "Gadget",
+	})
+	tx.Commit()
+
+	router := setupRouter(db)
+
+	requestBody := strings.NewReader(`{"name": ""}`)
+	request := httptest.NewRequest(http.MethodPut, "http://localhost:3000/api/categories/"+strconv.Itoa(category.Id), requestBody)
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("X-API-KEY", "SECRET")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 400, response.StatusCode)
+
+	//baca body
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{} //data bisa berubah ubah
+	json.Unmarshal(body, &responseBody)
+
+	//fmt.Println(responseBody) //baca responseBody
+
+	//pengecekan mendalam
+	assert.Equal(t, 400, int(responseBody["code"].(float64))) //float64 dikonversi menjadi integer
+	assert.Equal(t, "BAD REQUEST", responseBody["status"])
 }
 
 func TestGetCategorySuccess(t *testing.T) {
