@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/assert"
@@ -295,14 +296,116 @@ func TestDeleteCategorySuccess(t *testing.T) {
 	assert.Equal(t, "ok", responseBody["status"])
 }
 
-func TestCategoryFailed(t *testing.T) {
+func TestDeleteCategoryFailed(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
+	router := setupRouter(db)
 
+	//Deleted
+	request := httptest.NewRequest(http.MethodDelete, "http://localhost:3000/api/categories/404", nil)
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("X-API-KEY", "SECRET")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 404, response.StatusCode)
+
+	//baca body
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{} //data bisa berubah ubah
+	json.Unmarshal(body, &responseBody)
+
+	//fmt.Println(responseBody) //baca responseBody
+
+	//pengecekan mendalam
+	assert.Equal(t, 404, int(responseBody["code"].(float64))) //float64 dikonversi menjadi integer
+	assert.Equal(t, "NOT FOUND", responseBody["status"])
 }
 
-func TestLIstCategoriesSuccess(t *testing.T) {
+func TestListCategoriesSuccess(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
 
+	//memakai tx
+	tx, _ := db.Begin()
+	//repository untuk created data
+	categoryRepository := repository.NewCategoryRespositoryImplementation()
+	category1 := categoryRepository.Save(context.Background(), tx, domain.Category{
+		Name: "Gadget",
+	})
+	category2 := categoryRepository.Save(context.Background(), tx, domain.Category{
+		Name: "Computer",
+	})
+	tx.Commit()
+
+	router := setupRouter(db)
+
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:3000/api/categories", nil)
+	request.Header.Add("X-API-KEY", "SECRET")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 200, response.StatusCode)
+
+	//baca body
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{} //data bisa berubah ubah
+	json.Unmarshal(body, &responseBody)
+
+	//fmt.Println(responseBody) //baca responseBody
+
+	//pengecekan mendalam
+	assert.Equal(t, 200, int(responseBody["code"].(float64))) //float64 dikonversi menjadi integer
+	assert.Equal(t, "ok", responseBody["status"])
+
+	//cek bentuk data
+	fmt.Println(responseBody)
+
+	//masuk ke dalam slice
+	var categories = responseBody["data"].([]interface{})
+
+	//konversi lagi
+	categoryResponse1 := categories[0].(map[string]interface{})
+	categoryResponse2 := categories[1].(map[string]interface{})
+
+	//pengecekan
+	assert.Equal(t, category1.Id, int(categoryResponse1["id"].(float64)))
+	assert.Equal(t, category1.Name, categoryResponse1["name"])
+
+	assert.Equal(t, category2.Id, int(categoryResponse2["id"].(float64)))
+	assert.Equal(t, category2.Name, categoryResponse2["name"])
 }
 
 func TestUnauthorized(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
 
+	router := setupRouter(db)
+
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:3000/api/categories", nil)
+	request.Header.Add("X-API-KEY", "")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 401, response.StatusCode)
+
+	//baca body
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{} //data bisa berubah ubah
+	json.Unmarshal(body, &responseBody)
+
+	//fmt.Println(responseBody) //baca responseBody
+
+	//pengecekan mendalam
+	assert.Equal(t, 401, int(responseBody["code"].(float64))) //float64 dikonversi menjadi integer
+	assert.Equal(t, "UNAUTHORIZED", responseBody["status"])
 }
