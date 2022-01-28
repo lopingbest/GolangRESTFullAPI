@@ -149,7 +149,6 @@ func TestUpdateCategorySuccess(t *testing.T) {
 	assert.Equal(t, "ok", responseBody["status"])
 	assert.Equal(t, category.Id, int(responseBody["data"].(map[string]interface{})["id"].(float64)))
 	assert.Equal(t, "Gadget", responseBody["data"].(map[string]interface{})["name"])
-
 }
 
 func TestUpdateCategoryFailed(t *testing.T) {
@@ -192,7 +191,42 @@ func TestUpdateCategoryFailed(t *testing.T) {
 }
 
 func TestGetCategorySuccess(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
 
+	//memakai tx
+	tx, _ := db.Begin()
+	//repository untuk created data
+	categoryRepository := repository.NewCategoryRespositoryImplementation()
+	category := categoryRepository.Save(context.Background(), tx, domain.Category{
+		Name: "Gadget",
+	})
+	tx.Commit()
+
+	router := setupRouter(db)
+
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:3000/api/categories/"+strconv.Itoa(category.Id), nil)
+	request.Header.Add("X-API-KEY", "SECRET")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 200, response.StatusCode)
+
+	//baca body
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{} //data bisa berubah ubah
+	json.Unmarshal(body, &responseBody)
+
+	//fmt.Println(responseBody) //baca responseBody
+
+	//pengecekan mendalam
+	assert.Equal(t, 200, int(responseBody["code"].(float64))) //float64 dikonversi menjadi integer
+	assert.Equal(t, "ok", responseBody["status"])
+	assert.Equal(t, category.Id, int(responseBody["data"].(map[string]interface{})["id"].(float64)))
+	assert.Equal(t, category.Name, responseBody["data"].(map[string]interface{})["name"])
 }
 
 func TestGetCategoryFailed(t *testing.T) {
