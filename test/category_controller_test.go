@@ -230,7 +230,30 @@ func TestGetCategorySuccess(t *testing.T) {
 }
 
 func TestGetCategoryFailed(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
+	router := setupRouter(db)
 
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:3000/api/categories/404", nil)
+	request.Header.Add("X-API-KEY", "SECRET")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 404, response.StatusCode)
+
+	//baca body
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{} //data bisa berubah ubah
+	json.Unmarshal(body, &responseBody)
+
+	//fmt.Println(responseBody) //baca responseBody
+
+	//pengecekan mendalam
+	assert.Equal(t, 404, int(responseBody["code"].(float64))) //float64 dikonversi menjadi integer
+	assert.Equal(t, "NOT FOUND", responseBody["status"])
 }
 
 func TestDeleteCategorySuccess(t *testing.T) {
